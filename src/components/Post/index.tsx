@@ -26,7 +26,7 @@ export type PostProps = {
     title: string;
     description: string;
     cover: string;
-    date: string;
+    created_at: string;
     avatar: string;
     comments: CommentsProps[];
 }
@@ -48,7 +48,7 @@ const PostCard: React.FC<PostProps> = ({
             direction='column'
             boxShadow='lg'
         >
-            <Link href={`post/2`}>
+            <Link href={`post/${id}`}>
                 <HStack p='20px'>
                     <Box w='100%'>
                         <Text fontWeight='600' color="gray.800" w='100%' fontSize='2xl'>

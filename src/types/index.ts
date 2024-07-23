@@ -18,8 +18,26 @@ export interface Post {
     cover: string;
     created_at: string;
     avatar: string;
+    comments: CommentResume[];
+    highlighted: boolean
+}
+
+
+export interface PostDetails {
+    id: string;
+    title: string;
+    author: Author;
+    description: string;
+    cover: string;
+    created_at: string;
+    avatar: string;
     comments: Comment[];
     highlighted: boolean
+}
+
+export interface CommentResume {
+    id: string;
+    avatar: string;
 }
 
 export interface Comment {
@@ -27,4 +45,9 @@ export interface Comment {
     content: string;
     postId: string;
     authorId: string;
+}
+
+export interface PostsResponse {
+    posts: Post[];
+    nextPage: number | null;
 }

@@ -1,234 +1,63 @@
-import React, { useState } from 'react'
-import { Box, BoxProps, Button, Center, HStack, Spinner, VStack } from '@chakra-ui/react'
+import React, { useEffect, useState } from 'react'
+import { chakra, Box, BoxProps, Button, Center, HStack, Spinner, VStack } from '@chakra-ui/react'
 import Container from '../../components/Container';
-import { useQuery } from '@tanstack/react-query';
+import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import PostCard, { PostProps } from '../../components/Post';
 import { faker } from '@faker-js/faker';
 import Loading from '../../components/Loading';
+import { Post, PostsResponse } from '../../types';
+import { useInView } from 'react-intersection-observer';
 
-const _data: PostProps[] = [
-    {
-        id: faker.string.uuid(),
-        title: faker.lorem.word(),
-        cover: faker.image.urlPicsumPhotos({ width: 1080, height: 1080 }),
-        description: faker.lorem.paragraph(),
-        date: faker.date.anytime().toDateString(),
-        avatar: faker.image.avatarGitHub(),
-        comments: [
-            {
-                avatar: faker.image.avatarGitHub(),
-                id: faker.string.uuid()
-            },
-            {
-                avatar: faker.image.avatarGitHub(),
-                id: faker.string.uuid()
-            },
-            {
-                avatar: faker.image.avatarGitHub(),
-                id: faker.string.uuid()
-            },
-            {
-                avatar: faker.image.avatarGitHub(),
-                id: faker.string.uuid()
-            },
-            {
-                avatar: faker.image.avatarGitHub(),
-                id: faker.string.uuid()
-            },
-            {
-                avatar: faker.image.avatarGitHub(),
-                id: faker.string.uuid()
-            },
-            {
-                avatar: faker.image.avatarGitHub(),
-                id: faker.string.uuid()
-            },
-            {
-                avatar: faker.image.avatarGitHub(),
-                id: faker.string.uuid()
-            }
-        ]
-    },
-    {
-        id: faker.string.uuid(),
-        title: faker.lorem.word(),
-        cover: faker.image.urlPicsumPhotos({ width: 1080, height: 1080 }),
-        description: faker.lorem.paragraph(),
-        date: faker.date.anytime().toDateString(),
-        avatar: faker.image.avatarGitHub(),
-        comments: [
-            {
-                avatar: faker.image.avatarGitHub(),
-                id: faker.string.uuid()
-            },
-            {
-                avatar: faker.image.avatarGitHub(),
-                id: faker.string.uuid()
-            },
-            {
-                avatar: faker.image.avatarGitHub(),
-                id: faker.string.uuid()
-            },
-            {
-                avatar: faker.image.avatarGitHub(),
-                id: faker.string.uuid()
-            },
-            {
-                avatar: faker.image.avatarGitHub(),
-                id: faker.string.uuid()
-            },
-            {
-                avatar: faker.image.avatarGitHub(),
-                id: faker.string.uuid()
-            },
-            {
-                avatar: faker.image.avatarGitHub(),
-                id: faker.string.uuid()
-            },
-            {
-                avatar: faker.image.avatarGitHub(),
-                id: faker.string.uuid()
-            }
-        ]
-    },
-    {
-        id: faker.string.uuid(),
-        title: faker.lorem.word(),
-        cover: faker.image.urlPicsumPhotos({ width: 1080, height: 1080 }),
-        description: faker.lorem.paragraph(),
-        date: faker.date.anytime().toDateString(),
-        avatar: faker.image.avatarGitHub(),
-        comments: [
-            {
-                avatar: faker.image.avatarGitHub(),
-                id: faker.string.uuid()
-            },
-            {
-                avatar: faker.image.avatarGitHub(),
-                id: faker.string.uuid()
-            },
-            {
-                avatar: faker.image.avatarGitHub(),
-                id: faker.string.uuid()
-            },
-            {
-                avatar: faker.image.avatarGitHub(),
-                id: faker.string.uuid()
-            },
-            {
-                avatar: faker.image.avatarGitHub(),
-                id: faker.string.uuid()
-            },
-            {
-                avatar: faker.image.avatarGitHub(),
-                id: faker.string.uuid()
-            },
-            {
-                avatar: faker.image.avatarGitHub(),
-                id: faker.string.uuid()
-            },
-            {
-                avatar: faker.image.avatarGitHub(),
-                id: faker.string.uuid()
-            }
-        ]
-    },
-    {
-        id: faker.string.uuid(),
-        title: faker.lorem.word(),
-        cover: faker.image.urlPicsumPhotos({ width: 1080, height: 1080 }),
-        description: faker.lorem.paragraph(),
-        date: faker.date.anytime().toDateString(),
-        avatar: faker.image.avatarGitHub(),
-        comments: [
-            {
-                avatar: faker.image.avatarGitHub(),
-                id: faker.string.uuid()
-            },
-            {
-                avatar: faker.image.avatarGitHub(),
-                id: faker.string.uuid()
-            },
-            {
-                avatar: faker.image.avatarGitHub(),
-                id: faker.string.uuid()
-            },
-            {
-                avatar: faker.image.avatarGitHub(),
-                id: faker.string.uuid()
-            },
-            {
-                avatar: faker.image.avatarGitHub(),
-                id: faker.string.uuid()
-            },
-            {
-                avatar: faker.image.avatarGitHub(),
-                id: faker.string.uuid()
-            },
-            {
-                avatar: faker.image.avatarGitHub(),
-                id: faker.string.uuid()
-            },
-            {
-                avatar: faker.image.avatarGitHub(),
-                id: faker.string.uuid()
-            }
-        ]
-    },
-    {
-        id: faker.string.uuid(),
-        title: faker.lorem.word(),
-        cover: faker.image.urlPicsumPhotos({ width: 1080, height: 1080 }),
-        description: faker.lorem.paragraph(),
-        date: faker.date.anytime().toDateString(),
-        avatar: faker.image.avatarGitHub(),
-        comments: [
-            {
-                avatar: faker.image.avatarGitHub(),
-                id: faker.string.uuid()
-            },
-            {
-                avatar: faker.image.avatarGitHub(),
-                id: faker.string.uuid()
-            },
-            {
-                avatar: faker.image.avatarGitHub(),
-                id: faker.string.uuid()
-            },
-            {
-                avatar: faker.image.avatarGitHub(),
-                id: faker.string.uuid()
-            }
-        ]
-    },
-]
-
-const getData = async () => {
-    return new Promise<PostProps[]>((resolve) => {
-        setTimeout(() => { resolve(_data) }, 2000);
-    })
-}
+const fetchPosts = async ({ pageParam = 1 }): Promise<PostsResponse> => {
+    const response = await fetch(`/api/posts?page=${pageParam}`);
+    if (!response.ok) {
+        throw new Error('Network response was not ok');
+    }
+    return response.json();
+};
 
 export const SectionPost: React.FC<BoxProps> = props => {
+    const { ref, inView } = useInView({
+        threshold: 0.1,
+    });
+
     const [isAscending, setIsAscending] = useState(true);
 
-    const { data, error: errorPosts, isLoading: isLoadingPosts } = useQuery({
+    const {
+        data,
+        error,
+        fetchNextPage,
+        isLoading: isLoadingPosts,
+        hasNextPage,
+        isFetching,
+        isFetchingNextPage,
+    } = useInfiniteQuery({
         queryKey: ['allPosts'],
-        queryFn: async () => {
-            const data = await getData()
-            return data
-        },
-    })
+        queryFn: ({ pageParam = 1 }) => fetchPosts({ pageParam }),
+        getNextPageParam: (lastPage) => lastPage.nextPage,
+    });
+
+    const posts: Post[] = data?.pages.flatMap((data) => data.posts) ?? [];
+
+    const handleLoadMore = () => {
+        fetchNextPage();
+    };
 
     const handleSortToggle = () => {
         setIsAscending(!isAscending);
     };
 
-    const sortedData = data?.slice().sort((a, b) => {
-        const dateA = new Date(a.date).getTime();
-        const dateB = new Date(b.date).getTime();
+    const sortedData = posts.slice().sort((a, b) => {
+        const dateA = new Date(a.created_at).getTime();
+        const dateB = new Date(b.created_at).getTime();
         return isAscending ? dateA - dateB : dateB - dateA;
     });
+
+    useEffect(() => {
+        if (inView && hasNextPage) {
+            fetchNextPage();
+        }
+    }, [inView, fetchNextPage, hasNextPage]);
 
     return (
         <Box {...props}>
@@ -239,14 +68,20 @@ export const SectionPost: React.FC<BoxProps> = props => {
                     </Button>
 
                     <VStack gap={8} mt={4} mb={20}>
-                        {sortedData?.map((post) => (
-                            <PostCard key={post.id} {...post} />
+                        {sortedData.map((post: Post) => (
+                            <PostCard
+                                key={post.id}
+                                {...post}
+                            />
                         ))}
                     </VStack>
 
-                    <Button onClick={handleSortToggle}>
-                        {isAscending ? 'Ordenar por Data (Decrescente)' : 'Ordenar por Data (Crescente)'}
-                    </Button>
+                    <chakra.div ref={ref} />
+                    <Center>
+                        {isFetchingNextPage && <chakra.div>Loading more...</chakra.div>}
+                        <chakra.div>{isFetching && !isFetchingNextPage ? 'Fetching...' : null}</chakra.div>
+                        {error && <chakra.div>Error: {error.message}</chakra.div>}
+                    </Center>
                 </Container>
             </Loading>
         </Box>

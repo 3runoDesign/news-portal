@@ -10,35 +10,47 @@ import {
   InputGroup,
   useToast,
   ToastId,
-  HStack,
   Link,
+  HStack,
   Box,
   chakra
 } from "@chakra-ui/react";
-import React, { useState, useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
+import { useForm, SubmitHandler } from 'react-hook-form';
 import { useRouter } from 'next/navigation'
-import { SubmitHandler, useForm } from "react-hook-form";
-import NavigationSticky from "../../components/Navigation";
 import { useAuthStore } from "../../stores/authStore";
+import NavigationSticky from "../../components/Navigation";
 import { useMutation } from "@tanstack/react-query";
 
-interface LoginFormInputs {
+interface RegisterFormInputs {
   username: string;
   password: string;
 }
 
-const Login = () => {
+const Register = () => {
   const toast = useToast();
   const toastIdRef = useRef<ToastId | undefined>(undefined);
 
-  const { register, handleSubmit, setError, formState: { errors } } = useForm<LoginFormInputs>();
+  const { register, handleSubmit, setError, formState: { errors } } = useForm<RegisterFormInputs>();
 
   const router = useRouter();
+  const { isLogged } = useAuthStore();
+
+  function errorToast(msg: string) {
+    toastIdRef.current = toast({ status: "error", description: msg })
+  }
+
+  useEffect(() => {
+    if (isLogged) {
+      router.push('/');
+    }
+  }, [router]);
+
   const setToken = useAuthStore((state) => state.setToken);
 
   const mutation = useMutation({
-    mutationFn: async (data: LoginFormInputs) => {
-      const response = await fetch('/api/login', {
+    mutationFn: async (data: RegisterFormInputs) => {
+      const response = await fetch('/api/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
@@ -59,15 +71,14 @@ const Login = () => {
     }
   });
 
-  const onSubmit = (data: LoginFormInputs) => {
+  const onSubmit: SubmitHandler<RegisterFormInputs> = async (data) => {
     mutation.mutate(data);
   };
-
   return (
     <>
-      <NavigationSticky />
-      <Center minH={"80vh"} flexDirection="column" gap={"4"}>
-        <Heading>Login page</Heading>
+    <NavigationSticky />
+      <Center minH={"100vh"} flexDirection="column" gap={"4"}>
+        <Heading>Página de Registro</Heading>
 
         <chakra.form w="100%" maxW="380px" onSubmit={handleSubmit(onSubmit)} autoComplete="off">
           <FormControl mb={4} isInvalid={!!errors.username}>
@@ -90,11 +101,9 @@ const Login = () => {
             {errors.password && <span>{errors.password.message}</span>}
           </FormControl>
           <Box>
-            <Button type="submit" colorScheme="green" color="white">
-              Entrar
+            <Button type="submit" colorScheme="blue" color="white">
+              Registrar
             </Button>
-
-            {mutation.isError && <p>{mutation.error.message}</p>}
           </Box>
         </chakra.form>
       </Center>
@@ -102,4 +111,4 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default Register;

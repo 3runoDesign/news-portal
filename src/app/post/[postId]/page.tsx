@@ -1,97 +1,51 @@
 'use client'
 
 import { Box, Button, Card, CardBody, Center, chakra, Flex, FormControl, FormLabel, HStack, Icon, Text, Textarea, ToastId, useToast, VStack } from "@chakra-ui/react";
-import Container from "../../../components/Container";
-import AsyncImage from "../../../components/AsyncImage";
-import { PostProps } from "../../../components/Post";
-import { faker } from "@faker-js/faker";
-import { useQuery } from "@tanstack/react-query";
-import { useRef, useState } from "react";
-import { useForm, SubmitHandler } from 'react-hook-form';
 import NavigationSticky from "../../../components/Navigation";
+import { useParams, useRouter } from "next/navigation";
+import { useQueries, useQuery } from "@tanstack/react-query";
 import Loading from "../../../components/Loading";
+import AsyncImage from "../../../components/AsyncImage";
+import { PostDetails } from "../../../types";
+import Container from "../../../components/Container";
 import { ChatIcon } from '@chakra-ui/icons'
-
-const _data: PostProps = {
-  id: faker.string.uuid(),
-  title: faker.lorem.word(),
-  cover: faker.image.urlPicsumPhotos({ width: 1080, height: 1080 }),
-  description: faker.lorem.paragraphs(5, '<br style="magin-bottom: 12px"/>\n'),
-  date: faker.date.anytime().toDateString(),
-  avatar: faker.image.avatarGitHub(),
-  comments: [
-    {
-      avatar: faker.image.avatarGitHub(),
-      id: faker.string.uuid()
-    },
-    {
-      avatar: faker.image.avatarGitHub(),
-      id: faker.string.uuid()
-    },
-    {
-      avatar: faker.image.avatarGitHub(),
-      id: faker.string.uuid()
-    },
-    {
-      avatar: faker.image.avatarGitHub(),
-      id: faker.string.uuid()
-    },
-    {
-      avatar: faker.image.avatarGitHub(),
-      id: faker.string.uuid()
-    },
-    {
-      avatar: faker.image.avatarGitHub(),
-      id: faker.string.uuid()
-    },
-    {
-      avatar: faker.image.avatarGitHub(),
-      id: faker.string.uuid()
-    },
-    {
-      avatar: faker.image.avatarGitHub(),
-      id: faker.string.uuid()
-    }
-  ]
-}
+import { SubmitHandler, useForm } from "react-hook-form";
+import { useRef } from "react";
 
 interface CommentFormInputs {
   content: string;
 }
 
-const getData = async () => {
-  return new Promise<PostProps>((resolve) => {
-    setTimeout(() => { resolve(_data) }, 2000);
-  })
-}
+const fetchPostDetails = async (postId: string): Promise<PostDetails> => {
+  const response = await fetch(`/api/posts/${postId}`);
+  if (!response.ok) {
+    throw new Error('Network response was not ok');
+  }
+  return response.json();
+};
 
-const Post: React.FC<PostProps> = ({
-  id,
-  title,
-  description,
-  avatar,
-  comments: postComments
+const PostNews: React.FC = ({
 }) => {
+  const params = useParams();
+  const postId = params?.postId as string;
+
   const toast = useToast();
   const toastIdRef = useRef<ToastId | undefined>(undefined);
-  const [comments, setComments] = useState<[]>([]);
-
-  const { data, error: errorPosts, isLoading: isLoadingPost } = useQuery({
-    queryKey: ['getPost'],
-    queryFn: async () => {
-      const data = await getData()
-      return data
-    },
-  })
 
   const { register, handleSubmit, setError, reset, formState: { errors } } = useForm<CommentFormInputs>();
+
+  const { data, error, isLoading: isLoadingPost } = useQuery({
+    queryKey: ['postDetails', postId],
+    queryFn: () => fetchPostDetails(postId),
+    enabled: !!postId,
+  });
 
   const onSubmit: SubmitHandler<CommentFormInputs> = async (data) => {
     reset();
   };
 
   const handleDeleteComment = async (commentId: string) => {
-
+    toastIdRef.current = toast({ status: "success", description:`comentário ${commentId} apagado com sucesso.`});
   };
 
   return (
@@ -135,15 +89,14 @@ const Post: React.FC<PostProps> = ({
                 spinnerProps={{
                   size: "sm"
                 }}
-                src={data?.avatar}
+                src={data?.author.avatar}
                 alt="image cover"
                 w='45px'
                 h="45px"
                 borderRadius='32px'
               />
               <VStack gap={1} alignItems={"start"} alignContent={"center"}>
-                <chakra.h4 m={0}>Bruno fernando</chakra.h4>
-                <chakra.h4 m={0}>20020</chakra.h4>
+                <chakra.h4 m={0}>{data?.author.username}</chakra.h4>
               </VStack>
             </Flex>
           </Flex>
@@ -160,11 +113,9 @@ const Post: React.FC<PostProps> = ({
       {!isLoadingPost ? <Container maxW={"xl"} pb={20}>
 
         <Flex flexDirection="column" gap={"4"}>
-          {/* <Heading>Post</Heading> */}
-
-          <chakra.form w="100%" maxW="380px" onSubmit={handleSubmit(onSubmit)} autoComplete="off">
+          <chakra.form w="100%" onSubmit={handleSubmit(onSubmit)} autoComplete="off">
             <FormControl mb={4} isInvalid={!!errors.content}>
-              <FormLabel htmlFor="content">Conteúdo</FormLabel>
+              <FormLabel htmlFor="content">Comentário</FormLabel>
               <Textarea
                 id="content"
                 placeholder="Adicione um comentário"
@@ -195,28 +146,31 @@ const Post: React.FC<PostProps> = ({
 
           <VStack gap={4}>
 
-          <Card w="100%">
-            <CardBody>
-              <HStack gap={4}>
-                <Icon as={ChatIcon} color='blue.500' />
-                <HStack w="100%" gap={4}>
-                  <Box w="100%">
-                  <Text>os fhkjsad fjksad fhkjsa dhfjkas dhfsahf sajhsdf jkhasklf ahskjf hajksdhfjkas fjka sdjhkjahsdfskadhfkajshdflkajsdhfaksdjfpa</Text>
-                  </Box>
+            {data?.comments.map((comment) => (
+              <Card w="100%">
+                <CardBody>
+                  <HStack gap={4}>
+                    <Icon as={ChatIcon} color='blue.500' />
+                    <HStack w="100%" gap={4}>
+                      <Box w="100%">
+                        <Text>{comment.content}</Text>
+                      </Box>
 
-                  <Button px={8} colorScheme='red' size='xs' onClick={() => handleDeleteComment("1")}>Delete</Button>
-                </HStack>
-              </HStack>
-            </CardBody>
-          </Card>
+                      {data.author.id === comment.authorId ? (
+                        <Button px={8} colorScheme='red' size='xs' onClick={() => handleDeleteComment(comment.id)}>Delete</Button>
+                      ) : null}
+                    </HStack>
+                  </HStack>
+                </CardBody>
+              </Card>
+            ))}
 
           </VStack>
         </Flex>
 
       </Container> : null}
-
     </>
   );
 }
 
-export default Post;
+export default PostNews;
