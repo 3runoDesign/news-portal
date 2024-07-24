@@ -6,7 +6,7 @@ import PostCard, { PostProps } from '../../components/Post';
 import { faker } from '@faker-js/faker';
 import Loading from '../../components/Loading';
 import { Post, PostsResponse } from '../../types';
-import { useInView } from 'react-intersection-observer';
+import { useInView } from 'react-intersection-observer'
 
 const fetchPosts = async ({ pageParam = 1 }): Promise<PostsResponse> => {
     const response = await fetch(`/api/posts?page=${pageParam}`);
@@ -87,6 +87,5 @@ export const SectionPost: React.FC<BoxProps> = props => {
         </Box>
     )
 };
-
 
 export default SectionPost

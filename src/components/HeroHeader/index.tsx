@@ -10,6 +10,7 @@ import { useRef } from 'react';
 import { faker } from "@faker-js/faker";
 import AsyncImage from '../AsyncImage';
 import { useQuery } from '@tanstack/react-query';
+import Link from 'next/link';
 
 type DataProps = {
     title: string;
@@ -111,21 +112,22 @@ function HeroHeader(props: HTMLChakraProps<'header'>) {
                 right={0}
                 zIndex={3}
             >
-
-                <Button
-                    borderColor={"white"}
-                    color={"white"}
-                    variant='outline'
-                    _active={{
-                        bg: 'rgba(255, 255, 255, 0.3)'
-                    }}
-                    _hover={{
-                        bg: 'rgba(255, 255, 255, 0.45)',
-                        transform: 'scale(1.05)',
-                    }}
-                >
-                    Ler noticía
-                </Button>
+                <Link href="/post/2">
+                    <Button
+                        borderColor={"white"}
+                        color={"white"}
+                        variant='outline'
+                        _active={{
+                            bg: 'rgba(255, 255, 255, 0.3)'
+                        }}
+                        _hover={{
+                            bg: 'rgba(255, 255, 255, 0.45)',
+                            transform: 'scale(1.05)',
+                        }}
+                    >
+                        Ler notícia
+                    </Button>
+                </Link>
             </chakra.div>
         </chakra.header>
     )
