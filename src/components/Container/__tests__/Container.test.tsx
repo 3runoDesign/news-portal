@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react'
 import '@testing-library/jest-dom';
-import { Container } from '../src/components/Container';
+import { Container } from '../';
 
 describe('Container component', () => {
   it('renders with default styles and applies custom props', () => {

@@ -1,11 +1,10 @@
 // __tests__/SectionPost.test.tsx
-import React, { act } from 'react';
+import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { SectionPost } from '../src/sections/posts';
+import { SectionPost } from '../';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { useInView } from 'react-intersection-observer';
-import { generatePosts } from '../src/lib/generatePosts';
-import { PostsResponse } from '../src/types';
+import { PostsResponse } from '@/types';
 
 // Mock the dependencies
 const mockFetchPosts = jest.fn(() => Promise.resolve({ posts: [], nextPage: null }));

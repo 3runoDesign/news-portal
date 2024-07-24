@@ -25,10 +25,6 @@ function NavigationSticky(props: HTMLChakraProps<'header'>) {
     const { isLogged, logout } = useAuthStore();
     const router = useRouter();
 
-    useEffect(() => {
-        console.log({ isLogged })
-    }, [isLogged])
-
     const handleLogout = async () => {
         try {
             await fetch('/api/logout', {
