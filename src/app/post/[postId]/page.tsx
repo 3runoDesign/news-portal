@@ -2,15 +2,16 @@
 
 import { Box, Button, Card, CardBody, Center, chakra, Flex, FormControl, FormLabel, HStack, Icon, Text, Textarea, ToastId, useToast, VStack } from "@chakra-ui/react";
 import NavigationSticky from "../../../components/Navigation";
-import { useParams, useRouter } from "next/navigation";
-import { useQueries, useQuery } from "@tanstack/react-query";
+import { useParams } from "next/navigation";
+import { useQuery } from "@tanstack/react-query";
 import Loading from "../../../components/Loading";
 import AsyncImage from "../../../components/AsyncImage";
-import { PostDetails } from "../../../types";
+import { Comment, PostDetails } from "../../../types";
 import Container from "../../../components/Container";
 import { ChatIcon } from '@chakra-ui/icons'
 import { SubmitHandler, useForm } from "react-hook-form";
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import { v4 as uuidv4 } from 'uuid';
 
 interface CommentFormInputs {
   content: string;
@@ -29,24 +30,44 @@ const PostNews: React.FC = ({
   const params = useParams();
   const postId = params?.postId as string;
 
+  const [comments, setComments] = useState<Comment[]>([]);
+
   const toast = useToast();
   const toastIdRef = useRef<ToastId | undefined>(undefined);
 
   const { register, handleSubmit, setError, reset, formState: { errors } } = useForm<CommentFormInputs>();
 
-  const { data, error, isLoading: isLoadingPost } = useQuery({
+  const { data: dataPostDetails, error, isLoading: isLoadingPost } = useQuery({
     queryKey: ['postDetails', postId],
     queryFn: () => fetchPostDetails(postId),
-    enabled: !!postId,
+    enabled: !!postId
   });
 
   const onSubmit: SubmitHandler<CommentFormInputs> = async (data) => {
+    const newComment: Comment = {
+      id: uuidv4(),
+      content: data.content,
+      authorId: dataPostDetails?.author.id || '',
+      postId
+    };
+
+    setComments((prevComments) => [...prevComments, newComment]);
     reset();
   };
 
   const handleDeleteComment = async (commentId: string) => {
-    toastIdRef.current = toast({ status: "success", description:`comentário ${commentId} apagado com sucesso.`});
+    setComments((prevComments) => prevComments.filter(comment => comment.id !== commentId));
+    toastIdRef.current = toast({
+      status: "success",
+      description: `Comentário ${commentId} apagado com sucesso.`,
+    });
   };
+
+  useEffect(() => {
+    if (dataPostDetails?.comments) {
+      setComments(dataPostDetails.comments);
+    }
+  }, [dataPostDetails]);
 
   return (
     <>
@@ -63,7 +84,7 @@ const PostNews: React.FC = ({
             direction='column'>
 
             <AsyncImage
-              src={data?.cover}
+              src={dataPostDetails?.cover}
               alt="image cover"
               w='100%'
               h="100%"
@@ -81,7 +102,7 @@ const PostNews: React.FC = ({
               textAlign='start'
               fontSize='xl'
               w='100%'>
-              {data?.title}
+              {dataPostDetails?.title}
             </Text>
 
             <Flex w={"100%"} alignContent={"center"} gap={2} justifyContent={"flex-end"}>
@@ -89,21 +110,21 @@ const PostNews: React.FC = ({
                 spinnerProps={{
                   size: "sm"
                 }}
-                src={data?.author.avatar}
+                src={dataPostDetails?.author.avatar}
                 alt="image cover"
                 w='45px'
                 h="45px"
                 borderRadius='32px'
               />
               <VStack gap={1} alignItems={"start"} alignContent={"center"}>
-                <chakra.h4 m={0}>{data?.author.username}</chakra.h4>
+                <chakra.h4 m={0}>{dataPostDetails?.author.username}</chakra.h4>
               </VStack>
             </Flex>
           </Flex>
 
           <Box mt={8}>
             <Center>
-              <chakra.p lineHeight="33px" dangerouslySetInnerHTML={{ __html: data?.description ?? "" }}></chakra.p>
+              <chakra.p lineHeight="33px" dangerouslySetInnerHTML={{ __html: dataPostDetails?.description ?? "" }}></chakra.p>
             </Center>
           </Box>
         </Loading>
@@ -146,7 +167,7 @@ const PostNews: React.FC = ({
 
           <VStack gap={4}>
 
-            {data?.comments.map((comment) => (
+            {comments.map((comment) => (
               <Card w="100%">
                 <CardBody>
                   <HStack gap={4}>
@@ -156,7 +177,7 @@ const PostNews: React.FC = ({
                         <Text>{comment.content}</Text>
                       </Box>
 
-                      {data.author.id === comment.authorId ? (
+                      {dataPostDetails?.author.id === comment.authorId ? (
                         <Button px={8} colorScheme='red' size='xs' onClick={() => handleDeleteComment(comment.id)}>Delete</Button>
                       ) : null}
                     </HStack>
