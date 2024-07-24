@@ -17,7 +17,7 @@ const Logout = () => {
   useEffect(() => {
     const timer = setTimeout(() => {
       toastIdRef.current = toast({ status: "success", description: "usuario deslogado!" });
-      router.push('/'); // Altere '/nova-pagina' para o caminho da página para onde você deseja redirecionar
+      router.push('/');
     }, 1000);
 
     return () => clearTimeout(timer);

@@ -3,10 +3,8 @@ import { generateToken } from '../../../lib/jwt';
 
 export async function POST(request: NextRequest) {
   try {
-    // Extrair dados do corpo da requisição
     const { username, password } = await request.json();
 
-    // Verificar se os dados são válidos
     if (!username || !password) {
       return NextResponse.json(
         { error: 'Username and password are required' },

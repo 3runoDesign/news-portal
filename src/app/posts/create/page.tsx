@@ -64,7 +64,7 @@ const CreatePost = () => {
           }
     
           const result = await response.json();
-          return result; // Retorna o resultado completo
+          return result;
         },
         onSuccess: (data) => {
           toastIdRef.current = toast({
