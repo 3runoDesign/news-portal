@@ -31,10 +31,10 @@ const AsyncImage: React.FC<AsyncImageProps> = ({ src, alt, spinnerProps, ...prop
           <Spinner size="xl" {...spinnerProps} />
         </Box>
       ) : imageSrc ? (
-        <Image src={imageSrc} alt={alt} {...props} />
+        <Image src={imageSrc} alt={alt} loading="lazy" {...props} />
       ) : (
         <Box display="flex" justifyContent="center" alignItems="center" w="100%" height="100%">
-          <Image src={PlaceholdImage.src} alt={alt} {...props} />
+          <Image src={PlaceholdImage.src} alt={alt} loading="lazy" {...props} />
         </Box>
       )}
     </Box>
