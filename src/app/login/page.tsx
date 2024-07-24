@@ -17,7 +17,7 @@ import {
 } from "@chakra-ui/react";
 import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation'
-import { SubmitHandler, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import NavigationSticky from "../../components/Navigation";
 import { useAuthStore } from "../../stores/authStore";
 import { useMutation } from "@tanstack/react-query";
@@ -31,7 +31,7 @@ const Login = () => {
   const toast = useToast();
   const toastIdRef = useRef<ToastId | undefined>(undefined);
 
-  const { register, handleSubmit, setError, formState: { errors } } = useForm<LoginFormInputs>();
+  const { register, handleSubmit, formState: { errors } } = useForm<LoginFormInputs>();
 
   const router = useRouter();
   const setToken = useAuthStore((state) => state.setToken);
