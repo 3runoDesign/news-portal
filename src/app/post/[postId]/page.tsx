@@ -1,8 +1,8 @@
 'use client'
 
-import { Box, Button, Card, CardBody, Center, chakra, Flex, FormControl, FormLabel, HStack, Icon, Text, Textarea, ToastId, useToast, VStack } from "@chakra-ui/react";
+import { Box, Button, Card, CardBody, Center, chakra, Flex, FormControl, FormLabel, Heading, HStack, Icon, Text, Textarea, ToastId, useToast, VStack } from "@chakra-ui/react";
 import NavigationSticky from "../../../components/Navigation";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import Loading from "../../../components/Loading";
 import AsyncImage from "../../../components/AsyncImage";
@@ -29,6 +29,7 @@ const PostNews: React.FC = ({
 }) => {
   const params = useParams();
   const postId = params?.postId as string;
+  const router = useRouter()
 
   const [comments, setComments] = useState<Comment[]>([]);
 
@@ -37,7 +38,7 @@ const PostNews: React.FC = ({
 
   const { register, handleSubmit, setError, reset, formState: { errors } } = useForm<CommentFormInputs>();
 
-  const { data: dataPostDetails, error, isLoading: isLoadingPost } = useQuery({
+  const { data: dataPostDetails, error: errorPostDetails, isLoading: isLoadingPost } = useQuery({
     queryKey: ['postDetails', postId],
     queryFn: () => fetchPostDetails(postId),
     enabled: !!postId
@@ -72,7 +73,22 @@ const PostNews: React.FC = ({
   return (
     <>
       <NavigationSticky />
+
+      {errorPostDetails ? <>
+        <Container>
+        <Center minH={"80vh"} flexDirection="column" gap={"4"}>
+          <Heading>Oops!</Heading>
+          <p>erro ao carregar post!</p>
+          <Button onClick={() => {
+            router.refresh()
+          }}>
+            tentar novamente
+          </Button>
+        </Center>
+      </Container>
+      </> : <>
       <Container maxW={"xl"} pb={20}>
+        {!errorPostDetails ?
         <Loading isLoading={isLoadingPost} textLoad="carregando post...">
           <Flex
             borderRadius='20px'
@@ -128,10 +144,13 @@ const PostNews: React.FC = ({
             </Center>
           </Box>
         </Loading>
+        :
+        <p>erro ao carregar</p>
+        }
 
       </Container>
 
-      {!isLoadingPost ? <Container maxW={"xl"} pb={20}>
+      {!isLoadingPost && !errorPostDetails ? <Container maxW={"xl"} pb={20}>
 
         <Flex flexDirection="column" gap={"4"}>
           <chakra.form w="100%" onSubmit={handleSubmit(onSubmit)} autoComplete="off">
@@ -190,6 +209,7 @@ const PostNews: React.FC = ({
         </Flex>
 
       </Container> : null}
+      </> }
     </>
   );
 }
