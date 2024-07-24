@@ -14,7 +14,7 @@ describe('Hero component', () => {
             <HeroHeader />
           </QueryClientProvider>)
 
-        // act
+        // assert
         await waitFor(() => {
             expect(screen.getByText('Ler notícia')).toBeInTheDocument();
           });
